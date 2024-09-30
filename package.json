@@ -1,0 +1,23 @@
+{
+  "name": "bottlemodelformation",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.7.7",
+    "blob": "^0.1.0",
+    "express": "^4.19.2",
+    "express-fileupload": "^1.5.1",
+    "FileReader": "^0.10.2",
+    "form-data": "^4.0.0",
+    "path": "^0.12.7",
+    "three": "^0.167.1",
+    "vblob": "^1.1.0"
+  },
+  "type": "module"
+}

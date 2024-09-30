@@ -1,0 +1,46 @@
+<script>
+  let prom = Promise.resolve();
+  function test(name, fn) {
+    prom = prom
+      .then(() => {
+        console.time(name);
+        return fn();
+      })
+      .then(() => {
+        console.timeEnd(name);
+      });
+  }
+  function require() {
+    return { VBlob: Blob, VFileReader: FileReader, Blob, FileReader };
+  }
+  function noline(a) {
+    const res = a.toString().replace(/\n/g, " ");
+    if (typeof a === "string") {
+      return '"' + res + '"';
+    }
+    return res;
+  }
+  function expect(a) {
+    return {
+      toBe(b) {
+        if (a !== b) console.error(`fail: ${noline(a)} === ${noline(b)}`);
+      },
+      toThrow(b) {
+        try {
+          a();
+        } catch (err) {
+          if (err.message !== b)
+            console.error(
+              `fail, matching error message: "${
+                err.message
+              }" === "${b}", ${noline(a)}`
+            );
+          return;
+        }
+        console.error(`fail, no throw, ${noline(a)}`);
+      },
+    };
+  }
+  let exports = {};
+</script>
+<script src="../out/index.test.js"></script>
