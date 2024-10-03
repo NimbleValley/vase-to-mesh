@@ -69,7 +69,7 @@ function segmentImage() {
         method: 'POST',
         url: 'https://detect.roboflow.com/bottles-4qqsl/1',
         params: {
-            api_key: '9urn0GaYDlCXlxe05a0a'
+            api_key: API_KEY
         },
         data: image,
         headers: {
@@ -77,7 +77,6 @@ function segmentImage() {
         }
     })
         .then(function (response) {
-            console.log(response.data);
             downloadFile(response.data.predictions[0].points);
         })
         .catch(function (error) {
@@ -113,7 +112,7 @@ function downloadFile(points) {
             leftSidePoints.push(points[i]);
         }
     }
-    leftSidePoints.sort((a, b) => a.y - b.y);
+    leftSidePoints.sort((a, b) => b.y - a.y);
 
     console.log(points.length);
     console.log(leftSidePoints.length);
@@ -122,17 +121,24 @@ function downloadFile(points) {
     let scene = new THREE.Scene();
     scene.name = 'Vase';
     let material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
-    
-    let nextY = leftSidePoints[leftSidePoints.length - 1].y;
-    
-    for (let i = 0; i < leftSidePoints.length - 1; i++) {
-        let geometry = new THREE.CylinderGeometry(midpoint - leftSidePoints[i].x, midpoint - leftSidePoints[i + 1].x, leftSidePoints[i + 1].y - leftSidePoints[i].y, 32, 1, false);
-        let cylinder = new THREE.Mesh(geometry, material);
-        console.log('Offset: ' + nextY);
-        console.log('Height: ' + (leftSidePoints[i + 1].y - leftSidePoints[i].y));
 
-        cylinder.position.set(0, nextY, 0);
-        nextY -= (leftSidePoints[i + 1].y - leftSidePoints[i].y);
+    let heights = [];
+    for (let i = 0; i < leftSidePoints.length - 1; i++) {
+        heights.push(Math.abs(leftSidePoints[i + 1].y - leftSidePoints[i + 0].y));
+    }
+
+    let onPosition = 0;
+    let lastPosition = 0;
+    for (let i = 0; i < heights.length; i++) {
+        let tempHeight = heights[i];
+
+        let geometry = new THREE.CylinderGeometry(midpoint - leftSidePoints[i + 1].x, midpoint - leftSidePoints[i].x, tempHeight, 32, 1, false);
+        let cylinder = new THREE.Mesh(geometry, material);
+
+        let nextPosition = onPosition + (lastPosition / 2) + (tempHeight/2);
+        cylinder.position.set(0, nextPosition, 0);
+        lastPosition = tempHeight;
+        onPosition = nextPosition;
 
         scene.add(cylinder);
     }
@@ -170,9 +176,6 @@ function downloadFile(points) {
 
             }
 
-            //downloadJSON(gltf);
-            //fs.writeFile(__dirname + '/vase.gltf', gltf);
-
         },
         // called when there is an error in the generation
         function (error) {
@@ -194,12 +197,10 @@ function getMiddleValue(v1, v2) {
 }
 
 function saveString(text, filename) {
-
     fs.writeFile(__dirname + '/temp/' + filename, text, function (err) {
         if (err) {
             return console.log(err);
         }
         console.log('File saved.');
     });
-
 }
